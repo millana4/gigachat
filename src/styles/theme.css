@@ -1,0 +1,23 @@
+:root {
+  /* Темная тема (по умолчанию) */
+  --color-bg-primary: #343541;
+  --color-bg-secondary: #444654;
+  --color-bg-sidebar: #202123;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c5c5d2;
+  --color-border: #4d4d4f;
+  --color-user-message: #0b6b17;
+  --color-assistant-message: #444654;
+}
+
+[data-theme="light"] {
+  /* Светлая тема */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f7f7f8;
+  --color-bg-sidebar: #f0f0f0;
+  --color-text-primary: #343541;
+  --color-text-secondary: #6b6f76;
+  --color-border: #e5e5e5;
+  --color-user-message: #0b6b17;
+  --color-assistant-message: #f0f0f0;
+}
