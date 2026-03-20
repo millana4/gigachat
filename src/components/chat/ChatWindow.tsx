@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
-import { mockMessages, Message } from '../../utils/mockData';
+import { Message } from '../../utils/mockData';
 
 interface ChatWindowProps {
   activeChatId: string;
@@ -46,11 +46,9 @@ const SettingsButton = styled.button`
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   
   const handleSendMessage = (message: string) => {
-    console.log('Send message:', message);
-    
     // Добавляем сообщение пользователя
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -62,18 +60,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     
-    // Имитируем получение ответа через 2 секунды
+    // Симулируем ответ ассистента через 1-2 секунды
+    const delay = 1000 + Math.random() * 1000;
+    
     setTimeout(() => {
+      let responseContent = '';
+      
+      if (message.toLowerCase().includes('привет') || message.toLowerCase().includes('здравствуй')) {
+        responseContent = 'Привет! Чем я могу вам помочь?';
+      } else if (message.toLowerCase().includes('как дела')) {
+        responseContent = 'У меня всё отлично! Я готов помочь вам с любыми вопросами.';
+      } else if (message.toLowerCase().includes('спасибо')) {
+        responseContent = 'Пожалуйста! Обращайтесь ещё.';
+      } else {
+        responseContent = `Я получил ваше сообщение: "${message}". Это тестовый ответ от ассистента. В следующих версиях здесь будет реальный ответ от GigaChat API.`;
+      }
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Это тестовый ответ от ассистента. Я обработал ваш запрос.',
+        content: responseContent,
         timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
       };
       
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
-    }, 2000);
+    }, delay);
   };
   
   const handleStopGeneration = () => {

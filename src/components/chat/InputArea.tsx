@@ -28,8 +28,9 @@ const StyledTextarea = styled.textarea`
   line-height: 1.5;
   resize: none;
   min-height: 24px;
-  max-height: 120px; /* 5 строк примерно */
+  max-height: 120px;
   padding: 8px 0;
+  font-family: inherit;
   
   &:focus {
     outline: none;
@@ -37,6 +38,11 @@ const StyledTextarea = styled.textarea`
   
   &::placeholder {
     color: var(--color-text-secondary);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -80,9 +86,11 @@ const InputArea: React.FC<InputAreaProps> = ({
   onStopGeneration,
   isLoading = false 
 }) => {
+  // useState для хранения значения поля ввода
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
+  // Автоматическая подстройка высоты textarea
   const adjustHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -95,6 +103,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     adjustHeight();
   }, [message]);
   
+  // Обработка нажатия Enter
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -102,10 +111,12 @@ const InputArea: React.FC<InputAreaProps> = ({
     }
   };
   
+  // Отправка сообщения
   const handleSend = () => {
+    // Проверяем: сообщение не пустое и не идет загрузка
     if (message.trim() && !isLoading) {
       onSendMessage?.(message);
-      setMessage('');
+      setMessage(''); // Очищаем поле после отправки
       
       // Сбрасываем высоту textarea
       if (textareaRef.current) {
@@ -128,10 +139,11 @@ const InputArea: React.FC<InputAreaProps> = ({
           onKeyDown={handleKeyDown}
           placeholder="Введите сообщение..."
           rows={1}
+          disabled={isLoading} // Блокируем поле ввода во время загрузки
         />
         
         <ButtonsContainer>
-          <IconButton onClick={handleAttach} title="Прикрепить изображение">
+          <IconButton onClick={handleAttach} title="Прикрепить изображение" disabled={isLoading}>
             📎
           </IconButton>
           
@@ -143,7 +155,7 @@ const InputArea: React.FC<InputAreaProps> = ({
             <SendButton 
               hasContent={message.trim().length > 0} 
               onClick={handleSend}
-              disabled={!message.trim()}
+              disabled={!message.trim() || isLoading} // Блокируем кнопку при пустом вводе или загрузке
               title="Отправить"
             >
               ➤

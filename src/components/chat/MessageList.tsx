@@ -42,16 +42,20 @@ const MessagesWrapper = styled.div`
   margin: 0 auto;
 `;
 
+// Создаем компонент для пустого div, на который будем ссылаться
+const ScrollAnchor = styled.div`
+  height: 1px;
+`;
+
 const MessageList: React.FC<MessageListProps> = ({ messages, isLoading = false }) => {
+  // Создаем ref для привязки к пустому div в конце списка
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  
+  // Автоматическая прокрутка при изменении messages или isLoading
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+    // Плавно прокручиваем к последнему сообщению
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]); // Зависимости: когда меняются сообщения или состояние загрузки
   
   if (messages.length === 0) {
     return (
@@ -73,9 +77,11 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading = false }
           />
         ))}
         
+        {/* Индикатор загрузки */}
         {isLoading && <TypingIndicator isVisible={true} />}
         
-        <div ref={messagesEndRef} />
+        {/* Пустой div для привязки ref - всегда в конце списка */}
+        <ScrollAnchor ref={messagesEndRef} />
       </MessagesWrapper>
     </ListContainer>
   );
