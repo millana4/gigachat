@@ -9,11 +9,15 @@ const SidebarContainer = styled.div`
   flex-direction: column;
   height: 100%;
   padding: 16px;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 const NewChatButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 12px;
   margin-bottom: 16px;
@@ -23,6 +27,8 @@ const NewChatButton = styled.button`
   color: var(--color-text-primary);
   cursor: pointer;
   font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
   
   &:hover {
     background-color: var(--color-bg-secondary);

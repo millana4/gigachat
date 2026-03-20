@@ -9,7 +9,7 @@ interface ChatItemProps {
   onSelect?: (id: string) => void;
 }
 
-const ItemContainer = styled.div<{ isActive: boolean }>`
+const ItemContainer = styled.div<{ $isActive: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,7 +17,9 @@ const ItemContainer = styled.div<{ isActive: boolean }>`
   margin: 4px 0;
   border-radius: 8px;
   cursor: pointer;
-  background-color: ${props => props.isActive ? 'var(--color-bg-secondary)' : 'transparent'};
+  background-color: ${props => props.$isActive ? 'var(--color-bg-secondary)' : 'transparent'};
+  width: 100%;
+  box-sizing: border-box;
   
   &:hover {
     background-color: var(--color-bg-secondary);
@@ -31,6 +33,7 @@ const ItemContainer = styled.div<{ isActive: boolean }>`
 const ChatInfo = styled.div`
   flex: 1;
   overflow: hidden;
+  min-width: 0;
 `;
 
 const ChatTitle = styled.div`
@@ -51,10 +54,8 @@ const ChatDate = styled.div`
 const ChatActions = styled.div`
   display: none;
   gap: 8px;
-  
-  &.chat-actions {
-    display: none;
-  }
+  flex-shrink: 0;
+  margin-left: 8px;
 `;
 
 const ActionButton = styled.button`
@@ -88,24 +89,21 @@ const ChatItem: React.FC<ChatItemProps> = ({
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
-    // Пока просто заглушка
     console.log('Edit chat', id);
   };
   
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Пока просто заглушка
     console.log('Delete chat', id);
   };
   
-  // Форматируем дату для отображения
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   };
   
   return (
-    <ItemContainer isActive={isActive} onClick={handleSelect}>
+    <ItemContainer $isActive={isActive} onClick={handleSelect}>
       <ChatInfo>
         <ChatTitle>{title}</ChatTitle>
         <ChatDate>{formatDate(lastMessageDate)}</ChatDate>

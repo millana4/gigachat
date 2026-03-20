@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 const SearchContainer = styled.div`
   margin-bottom: 16px;
+  width: 100%;
 `;
 
 const Input = styled.input`
@@ -13,6 +14,7 @@ const Input = styled.input`
   border-radius: 8px;
   color: var(--color-text-primary);
   font-size: 14px;
+  box-sizing: border-box;
   
   &::placeholder {
     color: var(--color-text-secondary);
@@ -29,7 +31,7 @@ const SearchInput: React.FC = () => {
     <SearchContainer>
       <Input 
         type="text" 
-        placeholder="Поиск по чатам..." 
+        placeholder="🔍 Поиск по чатам..." 
       />
     </SearchContainer>
   );

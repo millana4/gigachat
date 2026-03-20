@@ -17,6 +17,9 @@ interface ChatListProps {
 const ListContainer = styled.div`
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 -16px;
+  padding: 0 16px;
   
   &::-webkit-scrollbar {
     width: 6px;
@@ -35,7 +38,6 @@ const ListContainer = styled.div`
 const ChatList: React.FC<ChatListProps> = ({ chats, activeChatId }) => {
   const handleSelectChat = (chatId: string) => {
     console.log('Selected chat:', chatId);
-    // Здесь потом будет логика переключения чата
   };
   
   return (

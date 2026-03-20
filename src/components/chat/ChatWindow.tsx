@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
@@ -48,8 +48,43 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isActiveRef = useRef(true);
+  
+  const addAssistantResponse = useCallback((userMessage: string) => {
+    if (!isActiveRef.current) return;
+    
+    let responseContent = '';
+    
+    if (userMessage.toLowerCase().includes('привет') || userMessage.toLowerCase().includes('здравствуй')) {
+      responseContent = 'Привет! Чем я могу вам помочь?';
+    } else if (userMessage.toLowerCase().includes('как дела')) {
+      responseContent = 'У меня всё отлично! Я готов помочь вам с любыми вопросами.';
+    } else if (userMessage.toLowerCase().includes('спасибо')) {
+      responseContent = 'Пожалуйста! Обращайтесь ещё.';
+    } else {
+      responseContent = `Я получил ваше сообщение: "${userMessage}". Это тестовый ответ от ассистента. В следующих версиях здесь будет реальный ответ от GigaChat API.`;
+    }
+    
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: responseContent,
+      timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    setMessages(prev => [...prev, assistantMessage]);
+    setIsLoading(false);
+  }, []);
+  
   const handleSendMessage = (message: string) => {
-    // Добавляем сообщение пользователя
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    isActiveRef.current = true;
+    
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -60,36 +95,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     
-    // Симулируем ответ ассистента через 1-2 секунды
-    const delay = 1000 + Math.random() * 1000;
-    
-    setTimeout(() => {
-      let responseContent = '';
-      
-      if (message.toLowerCase().includes('привет') || message.toLowerCase().includes('здравствуй')) {
-        responseContent = 'Привет! Чем я могу вам помочь?';
-      } else if (message.toLowerCase().includes('как дела')) {
-        responseContent = 'У меня всё отлично! Я готов помочь вам с любыми вопросами.';
-      } else if (message.toLowerCase().includes('спасибо')) {
-        responseContent = 'Пожалуйста! Обращайтесь ещё.';
-      } else {
-        responseContent = `Я получил ваше сообщение: "${message}". Это тестовый ответ от ассистента. В следующих версиях здесь будет реальный ответ от GigaChat API.`;
-      }
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: responseContent,
-        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, delay);
+    timerRef.current = setTimeout(() => {
+      addAssistantResponse(message);
+      timerRef.current = null;
+    }, 2000);
   };
   
   const handleStopGeneration = () => {
-    console.log('Stop generation');
+    isActiveRef.current = false;
+    
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    
     setIsLoading(false);
   };
   

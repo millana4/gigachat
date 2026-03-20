@@ -5,6 +5,10 @@ const InputContainer = styled.div`
   border-top: 1px solid var(--color-border);
   padding: 16px;
   background-color: var(--color-bg-primary);
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 
 const InputWrapper = styled.div`
@@ -17,6 +21,11 @@ const InputWrapper = styled.div`
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 8px 12px;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+    padding: 6px 10px;
+  }
 `;
 
 const StyledTextarea = styled.textarea`
@@ -49,6 +58,10 @@ const StyledTextarea = styled.textarea`
 const ButtonsContainer = styled.div`
   display: flex;
   gap: 8px;
+  
+  @media (max-width: 768px) {
+    gap: 4px;
+  }
 `;
 
 const IconButton = styled.button<{ isStop?: boolean }>`
@@ -59,6 +72,7 @@ const IconButton = styled.button<{ isStop?: boolean }>`
   padding: 8px;
   font-size: 18px;
   border-radius: 4px;
+  transition: all 0.2s;
   
   &:hover {
     background-color: var(--color-border);
@@ -68,6 +82,11 @@ const IconButton = styled.button<{ isStop?: boolean }>`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 20px; /* Чуть больше для тач-устройств */
   }
 `;
 
@@ -86,7 +105,7 @@ const InputArea: React.FC<InputAreaProps> = ({
   onStopGeneration,
   isLoading = false 
 }) => {
-  // useState для хранения значения поля ввода
+  // Значение textarea хранится в useState, обновляется через onChange
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -103,7 +122,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     adjustHeight();
   }, [message]);
   
-  // Обработка нажатия Enter
+  // Отправка по Enter, перенос строки по Shift+Enter
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -111,9 +130,9 @@ const InputArea: React.FC<InputAreaProps> = ({
     }
   };
   
-  // Отправка сообщения
+  // Отправка сообщения по кнопке
   const handleSend = () => {
-    // Проверяем: сообщение не пустое и не идет загрузка
+    // Отправка пустого сообщения запрещена (проверка на пробелы)
     if (message.trim() && !isLoading) {
       onSendMessage?.(message);
       setMessage(''); // Очищаем поле после отправки
@@ -129,21 +148,28 @@ const InputArea: React.FC<InputAreaProps> = ({
     console.log('Attach image - заглушка');
   };
   
+  // Проверяем, есть ли текст (не только пробелы)
+  const hasContent = message.trim().length > 0;
+  
   return (
     <InputContainer>
       <InputWrapper>
         <StyledTextarea
           ref={textareaRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
+          value={message}                    // значение из useState
+          onChange={(e) => setMessage(e.target.value)}  // обновление через onChange
+          onKeyDown={handleKeyDown}          // обработка Enter
           placeholder="Введите сообщение..."
           rows={1}
-          disabled={isLoading} // Блокируем поле ввода во время загрузки
+          disabled={isLoading}
         />
         
         <ButtonsContainer>
-          <IconButton onClick={handleAttach} title="Прикрепить изображение" disabled={isLoading}>
+          <IconButton 
+            onClick={handleAttach} 
+            title="Прикрепить изображение" 
+            disabled={isLoading}
+          >
             📎
           </IconButton>
           
@@ -153,9 +179,9 @@ const InputArea: React.FC<InputAreaProps> = ({
             </IconButton>
           ) : (
             <SendButton 
-              hasContent={message.trim().length > 0} 
+              hasContent={hasContent} 
               onClick={handleSend}
-              disabled={!message.trim() || isLoading} // Блокируем кнопку при пустом вводе или загрузке
+              disabled={!hasContent}        // кнопка неактивна при пустом вводе
               title="Отправить"
             >
               ➤
