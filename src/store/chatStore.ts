@@ -1,6 +1,7 @@
 // src/store/chatStore.ts
 import { create } from 'zustand';
 import { Chat, Message, ChatState } from '../types';
+import { loadFromStorage, saveToStorage } from '../utils/storage';
 
 // Расширяем состояние методами для изменения
 interface ChatStore extends ChatState {
@@ -184,13 +185,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   
   // Инициализация (пока без localStorage, просто создаём демо-чат)
   init: () => {
-    const { chats } = get();
-    if (chats.length === 0) {
-      const demoChat = createDemoChat();
-      set({ 
-        chats: [demoChat], 
-        activeChatId: demoChat.id 
-      });
+    const savedData = loadFromStorage();
+    if (savedData && savedData.chats.length > 0) {
+        set({ chats: savedData.chats, activeChatId: savedData.activeChatId });
+    } else {
+        const demoChat = createDemoChat();
+        set({ chats: [demoChat], activeChatId: demoChat.id });
     }
   },
 }));
