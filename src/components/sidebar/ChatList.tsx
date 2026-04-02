@@ -1,17 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import ChatItem from './ChatItem';
-
-interface Chat {
-  id: string;
-  title: string;
-  lastMessageDate: string;
-  isActive: boolean;
-}
+import { Chat } from '../../types';
 
 interface ChatListProps {
   chats: Chat[];
-  activeChatId: string;
+  activeChatId: string | null;
+  onSelectChat: (chatId: string) => void;
+  onEditChat: (chatId: string, newTitle: string) => void;
+  onDeleteChat: (chatId: string) => void;
 }
 
 const ListContainer = styled.div`
@@ -35,23 +32,54 @@ const ListContainer = styled.div`
   }
 `;
 
-const ChatList: React.FC<ChatListProps> = ({ chats, activeChatId }) => {
-  const handleSelectChat = (chatId: string) => {
-    console.log('Selected chat:', chatId);
-  };
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+`;
+
+const ChatList: React.FC<ChatListProps> = ({ 
+  chats, 
+  activeChatId, 
+  onSelectChat, 
+  onEditChat, 
+  onDeleteChat 
+}) => {
+  if (chats.length === 0) {
+    return (
+      <ListContainer>
+        <EmptyState>
+          🤔 Нет чатов<br />
+          Нажмите "Новый чат" чтобы начать
+        </EmptyState>
+      </ListContainer>
+    );
+  }
   
   return (
     <ListContainer>
-      {chats.map(chat => (
-        <ChatItem
-          key={chat.id}
-          id={chat.id}
-          title={chat.title}
-          lastMessageDate={chat.lastMessageDate}
-          isActive={chat.id === activeChatId}
-          onSelect={handleSelectChat}
-        />
-      ))}
+      {chats.map(chat => {
+        // Получаем последнее сообщение для отображения
+        const lastMessage = chat.messages.length > 0 
+          ? chat.messages[chat.messages.length - 1].content 
+          : '';
+        const lastMessagePreview = lastMessage.slice(0, 50) + (lastMessage.length > 50 ? '...' : '');
+        
+        return (
+          <ChatItem
+            key={chat.id}
+            id={chat.id}
+            title={chat.title}
+            lastMessage={lastMessagePreview}
+            lastMessageDate={chat.updatedAt}
+            isActive={chat.id === activeChatId}
+            onSelect={onSelectChat}
+            onEdit={onEditChat}
+            onDelete={onDeleteChat}
+          />
+        );
+      })}
     </ListContainer>
   );
 };

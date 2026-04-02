@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import SearchInput from './SearchInput';
 import ChatList from './ChatList';
-import { mockChats } from '../../utils/mockData';
+import { useChatStore } from '../../store/chatStore';
 
 const SidebarContainer = styled.div`
   display: flex;
@@ -35,22 +35,150 @@ const NewChatButton = styled.button`
   }
 `;
 
+// Модальное окно для подтверждения удаления
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+`;
+
+const ModalContent = styled.div`
+  background-color: var(--color-bg-primary);
+  border-radius: 12px;
+  padding: 24px;
+  width: 320px;
+  max-width: 90%;
+  border: 1px solid var(--color-border);
+`;
+
+const ModalTitle = styled.h3`
+  color: var(--color-text-primary);
+  margin: 0 0 16px 0;
+  font-size: 18px;
+`;
+
+const ModalText = styled.p`
+  color: var(--color-text-secondary);
+  margin: 0 0 24px 0;
+  font-size: 14px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+`;
+
+const ModalButton = styled.button<{ variant?: 'danger' }>`
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: ${props => props.variant === 'danger' ? '#dc3545' : 'var(--color-border)'};
+  color: ${props => props.variant === 'danger' ? 'white' : 'var(--color-text-primary)'};
+  
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
 interface SidebarProps {
-  activeChatId: string;
+  activeChatId?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeChatId }) => {
+  const { chats, createNewChat, setActiveChat, updateChatTitle, deleteChat } = useChatStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
+  
+  // Поиск по чатам (по названию и последнему сообщению)
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) return chats;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return chats.filter(chat => {
+      // Поиск по названию
+      if (chat.title.toLowerCase().includes(query)) return true;
+      
+      // Поиск по последнему сообщению
+      const lastMessage = chat.messages[chat.messages.length - 1];
+      if (lastMessage && lastMessage.content.toLowerCase().includes(query)) return true;
+      
+      return false;
+    });
+  }, [chats, searchQuery]);
+  
+  const handleNewChat = () => {
+    const newChatId = createNewChat();
+    console.log('New chat created:', newChatId);
+  };
+  
+  const handleSelectChat = (chatId: string) => {
+    setActiveChat(chatId);
+  };
+  
+  const handleEditChat = (chatId: string, newTitle: string) => {
+    updateChatTitle(chatId, newTitle);
+  };
+  
+  const handleDeleteClick = (chatId: string) => {
+    setChatToDelete(chatId);
+  };
+  
+  const handleConfirmDelete = () => {
+    if (chatToDelete) {
+      deleteChat(chatToDelete);
+      setChatToDelete(null);
+    }
+  };
+  
+  const handleCancelDelete = () => {
+    setChatToDelete(null);
+  };
+  
   return (
-    <SidebarContainer>
-      <NewChatButton>
-        <span>+</span>
-        Новый чат
-      </NewChatButton>
+    <>
+      <SidebarContainer>
+        <NewChatButton onClick={handleNewChat}>
+          <span>+</span>
+          Новый чат
+        </NewChatButton>
+        
+        <SearchInput value={searchQuery} onChange={setSearchQuery} />
+        
+        <ChatList 
+          chats={filteredChats}
+          activeChatId={activeChatId || null}
+          onSelectChat={handleSelectChat}
+          onEditChat={handleEditChat}
+          onDeleteChat={handleDeleteClick}
+        />
+      </SidebarContainer>
       
-      <SearchInput />
-      
-      <ChatList chats={mockChats} activeChatId={activeChatId} />
-    </SidebarContainer>
+      {/* Модальное окно подтверждения удаления */}
+      {chatToDelete && (
+        <ModalOverlay onClick={handleCancelDelete}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>Удалить чат?</ModalTitle>
+            <ModalText>
+              Вы уверены, что хотите удалить этот чат? Это действие нельзя отменить.
+            </ModalText>
+            <ModalButtons>
+              <ModalButton onClick={handleCancelDelete}>Отмена</ModalButton>
+              <ModalButton variant="danger" onClick={handleConfirmDelete}>Удалить</ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+    </>
   );
 };
 

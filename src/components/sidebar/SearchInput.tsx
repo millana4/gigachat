@@ -1,6 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 
+interface SearchInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
 const SearchContainer = styled.div`
   margin-bottom: 16px;
   width: 100%;
@@ -26,12 +31,14 @@ const Input = styled.input`
   }
 `;
 
-const SearchInput: React.FC = () => {
+const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
   return (
     <SearchContainer>
       <Input 
         type="text" 
         placeholder="🔍 Поиск по чатам..." 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
       />
     </SearchContainer>
   );

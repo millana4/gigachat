@@ -1,8 +1,9 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
-import { Message } from '../../utils/mockData';
+import { useChatStore } from '../../store/chatStore';
+import { Message } from '../../types';
 
 interface ChatWindowProps {
   activeChatId: string;
@@ -45,90 +46,84 @@ const SettingsButton = styled.button`
 `;
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { 
+    chats, 
+    isLoading, 
+    isStreaming, 
+    streamingContent,
+    addMessage, 
+    updateLastMessage,
+    setLoading,
+    setStreaming,
+    updateStreamingContent,
+    finishStreaming,
+    setError
+  } = useChatStore();
   
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isActiveRef = useRef(true);
+  const currentChat = chats.find(chat => chat.id === activeChatId);
+  const messages = currentChat?.messages || [];
   
-  const addAssistantResponse = useCallback((userMessage: string) => {
-    if (!isActiveRef.current) return;
+  const handleSendMessage = useCallback(async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return;
     
-    let responseContent = '';
-    
-    if (userMessage.toLowerCase().includes('привет') || userMessage.toLowerCase().includes('здравствуй')) {
-      responseContent = 'Привет! Чем я могу вам помочь?';
-    } else if (userMessage.toLowerCase().includes('как дела')) {
-      responseContent = 'У меня всё отлично! Я готов помочь вам с любыми вопросами.';
-    } else if (userMessage.toLowerCase().includes('спасибо')) {
-      responseContent = 'Пожалуйста! Обращайтесь ещё.';
-    } else {
-      responseContent = `Я получил ваше сообщение: "${userMessage}". Это тестовый ответ от ассистента. В следующих версиях здесь будет реальный ответ от GigaChat API.`;
-    }
-    
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: responseContent,
-      timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMessages(prev => [...prev, assistantMessage]);
-    setIsLoading(false);
-  }, []);
-  
-  const handleSendMessage = (message: string) => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    
-    isActiveRef.current = true;
-    
+    // Создаём сообщение пользователя
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: message,
+      content: messageText,
       timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
     };
     
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
+    // Добавляем сообщение пользователя в store
+    addMessage(activeChatId, userMessage);
     
-    timerRef.current = setTimeout(() => {
-      addAssistantResponse(message);
-      timerRef.current = null;
-    }, 2000);
-  };
-  
-  const handleStopGeneration = () => {
-    isActiveRef.current = false;
+    // Устанавливаем состояние загрузки
+    setLoading(true);
+    setStreaming(true);
     
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    // Имитация ответа (позже заменим на реальный API)
+    try {
+      let responseText = '';
+      const mockResponse = `Это имитация ответа на ваше сообщение: "${messageText}". В следующем шаге мы подключим реальный GigaChat API!`;
+      
+      // Имитируем потоковый вывод (по 5 символов за раз)
+      for (let i = 0; i <= mockResponse.length; i++) {
+        responseText = mockResponse.slice(0, i);
+        updateStreamingContent(responseText);
+        updateLastMessage(activeChatId, responseText);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Ошибка при отправке сообщения');
+    } finally {
+      finishStreaming();
     }
-    
-    setIsLoading(false);
-  };
+  }, [activeChatId, isLoading, addMessage, updateLastMessage, setLoading, setStreaming, updateStreamingContent, finishStreaming, setError]);
+  
+  const handleStopGeneration = useCallback(() => {
+    finishStreaming();
+  }, [finishStreaming]);
   
   return (
     <ChatContainer>
       <ChatHeader>
-        <ChatTitle>
-          {activeChatId === '1' ? 'Обсуждение проекта' : 'Чат'}
-        </ChatTitle>
+        <ChatTitle>{currentChat?.title || 'Чат'}</ChatTitle>
         <SettingsButton onClick={onOpenSettings} title="Настройки">
           ⚙️
         </SettingsButton>
       </ChatHeader>
       
-      <MessageList messages={messages} isLoading={isLoading} />
+      <MessageList 
+        messages={messages} 
+        isLoading={isLoading || isStreaming}
+        streamingMessage={streamingContent}
+      />
       
       <InputArea 
         onSendMessage={handleSendMessage}
         onStopGeneration={handleStopGeneration}
-        isLoading={isLoading}
+        isLoading={isLoading || isStreaming}
       />
     </ChatContainer>
   );

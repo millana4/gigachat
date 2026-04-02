@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Sidebar from '../sidebar/Sidebar';
 import ChatWindow from '../chat/ChatWindow';
+import { useChatStore } from '../../store/chatStore';
 
 interface AppLayoutProps {
   onOpenSettings?: () => void;
@@ -73,9 +74,7 @@ const Overlay = styled.div<{ isOpen: boolean }>`
 
 const AppLayout: React.FC<AppLayoutProps> = ({ onOpenSettings }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  // Пока используем моковые данные для активного чата
-  const [activeChatId] = useState('1');
+  const { activeChatId } = useChatStore();
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -94,13 +93,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({ onOpenSettings }) => {
       <Overlay isOpen={isSidebarOpen} onClick={closeSidebar} />
       
       <SidebarWrapper isOpen={isSidebarOpen}>
-        <Sidebar activeChatId={activeChatId} />
+        <Sidebar activeChatId={activeChatId || undefined} />
       </SidebarWrapper>
       
       <MainContent>
-        <ChatWindow activeChatId={activeChatId}
-        onOpenSettings={onOpenSettings} 
-        />
+        {activeChatId ? (
+          <ChatWindow 
+            activeChatId={activeChatId}
+            onOpenSettings={onOpenSettings} 
+          />
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <p>Выберите чат или создайте новый</p>
+          </div>
+        )}
       </MainContent>
     </LayoutContainer>
   );

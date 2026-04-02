@@ -3,17 +3,12 @@ import styled from 'styled-components';
 import Message from './Message';
 import TypingIndicator from './TypingIndicator';
 import EmptyState from '../ui/EmptyState';
-
-interface MessageType {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-}
+import { Message as MessageType } from '../../types';
 
 interface MessageListProps {
   messages: MessageType[];
   isLoading?: boolean;
+  streamingMessage?: string;
 }
 
 const ListContainer = styled.div`
@@ -42,22 +37,33 @@ const MessagesWrapper = styled.div`
   margin: 0 auto;
 `;
 
-// Создаем компонент для пустого div, на который будем ссылаться
 const ScrollAnchor = styled.div`
   height: 1px;
 `;
 
-const MessageList: React.FC<MessageListProps> = ({ messages, isLoading = false }) => {
-  // Создаем ref для привязки к пустому div в конце списка
+const MessageList: React.FC<MessageListProps> = ({ 
+  messages, 
+  isLoading = false,
+  streamingMessage = '' 
+}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Автоматическая прокрутка при изменении messages или isLoading
   useEffect(() => {
-    // Плавно прокручиваем к последнему сообщению
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]); // Зависимости: когда меняются сообщения или состояние загрузки
+  }, [messages, isLoading, streamingMessage]);
   
-  if (messages.length === 0) {
+  // Собираем все сообщения для отображения (включая streaming)
+  const allMessages = [...messages];
+  if (streamingMessage && !isLoading) {
+    allMessages.push({
+      id: 'streaming-temp',
+      role: 'assistant',
+      content: streamingMessage,
+      timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    });
+  }
+  
+  if (allMessages.length === 0 && !streamingMessage) {
     return (
       <ListContainer>
         <EmptyState />
@@ -68,7 +74,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading = false }
   return (
     <ListContainer>
       <MessagesWrapper>
-        {messages.map(message => (
+        {allMessages.map(message => (
           <Message
             key={message.id}
             role={message.role}
@@ -77,10 +83,8 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading = false }
           />
         ))}
         
-        {/* Индикатор загрузки */}
-        {isLoading && <TypingIndicator isVisible={true} />}
+        {isLoading && !streamingMessage && <TypingIndicator isVisible={true} />}
         
-        {/* Пустой div для привязки ref - всегда в конце списка */}
         <ScrollAnchor ref={messagesEndRef} />
       </MessagesWrapper>
     </ListContainer>
