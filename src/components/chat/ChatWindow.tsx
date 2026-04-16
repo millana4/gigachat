@@ -4,6 +4,7 @@ import MessageList from './MessageList';
 import InputArea from './InputArea';
 import { useChatStore } from '../../store/chatStore';
 import { Message } from '../../types';
+import { getRandomMockResponse } from '../../utils/mockResponses';
 
 interface ChatWindowProps {
   activeChatId: string;
@@ -81,10 +82,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
     setLoading(true);
     setStreaming(true);
     
-    // Имитация ответа (позже заменим на реальный API)
+    // Моковый ответ
     try {
+      const mockResponse = getRandomMockResponse();
       let responseText = '';
-      const mockResponse = `Это имитация ответа на ваше сообщение: "${messageText}". В следующем шаге мы подключим реальный GigaChat API!`;
       
       // Имитируем потоковый вывод (по 5 символов за раз)
       for (let i = 0; i <= mockResponse.length; i++) {

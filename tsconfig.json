@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-  ]
+, "../../Рабочий стол/InputArea.test.tsx", "../../Рабочий стол/Sidebar.test.tsx", "../../Рабочий стол/Message.test.tsx", "../../Рабочий стол/chatStore.test.ts", "../../Рабочий стол/storage.test.ts"  ]
 }
