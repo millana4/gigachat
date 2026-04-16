@@ -5,6 +5,8 @@ import InputArea from './InputArea';
 import { useChatStore } from '../../store/chatStore';
 import { Message } from '../../types';
 import { getRandomMockResponse } from '../../utils/mockResponses';
+import ErrorBoundary from '../ErrorBoundary';
+import ErrorMessage from '../ui/ErrorMessage';
 
 interface ChatWindowProps {
   activeChatId: string;
@@ -52,6 +54,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
     isLoading, 
     isStreaming, 
     streamingContent,
+    error,  
     addMessage, 
     updateLastMessage,
     setLoading,
@@ -75,33 +78,38 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
       timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
     };
     
-    // Добавляем сообщение пользователя в store
     addMessage(activeChatId, userMessage);
-    
-    // Устанавливаем состояние загрузки
     setLoading(true);
     setStreaming(true);
     
-    // Моковый ответ
     try {
       const mockResponse = getRandomMockResponse();
       let responseText = '';
       
-      // Имитируем потоковый вывод (по 5 символов за раз)
+      // Потоковый вывод
       for (let i = 0; i <= mockResponse.length; i++) {
         responseText = mockResponse.slice(0, i);
         updateStreamingContent(responseText);
         updateLastMessage(activeChatId, responseText);
         await new Promise(resolve => setTimeout(resolve, 20));
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
+      
+      const finalAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: mockResponse,
+        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
+      addMessage(activeChatId, finalAssistantMessage);
+      
+    } catch (err) {
+      console.error('Error sending message:', err);
       setError('Ошибка при отправке сообщения');
     } finally {
       finishStreaming();
     }
-  }, [activeChatId, isLoading, addMessage, updateLastMessage, setLoading, setStreaming, updateStreamingContent, finishStreaming, setError]);
-  
+  }, [activeChatId, isLoading, addMessage, updateLastMessage, setLoading, setStreaming, updateStreamingContent, finishStreaming, setError]); 
+
   const handleStopGeneration = useCallback(() => {
     finishStreaming();
   }, [finishStreaming]);
@@ -115,11 +123,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ activeChatId, onOpenSettings })
         </SettingsButton>
       </ChatHeader>
       
-      <MessageList 
-        messages={messages} 
-        isLoading={isLoading || isStreaming}
-        streamingMessage={streamingContent}
-      />
+      <ErrorBoundary>
+        <MessageList 
+          messages={messages} 
+          isLoading={isLoading || isStreaming}
+          streamingMessage={streamingContent}
+        />        
+      </ErrorBoundary>
+
+      {/* Отображение ошибки под полем ввода */}
+      {error && <ErrorMessage message={error} />}
       
       <InputArea 
         onSendMessage={handleSendMessage}

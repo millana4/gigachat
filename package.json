@@ -1,6 +1,7 @@
 {
   "name": "gigachat-frontend",
   "version": "0.1.0",
+  "homepage": "https://millana4.github.io/gigachat",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
@@ -25,7 +26,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "craco build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -46,9 +50,13 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/styled-components": "^5.1.36"
+    "@types/styled-components": "^5.1.36",
+    "gh-pages": "^6.3.0",
+    "source-map-explorer": "^2.5.3",
+    "webpack-bundle-analyzer": "^5.3.0"
   }
 }

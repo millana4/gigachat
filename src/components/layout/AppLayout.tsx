@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import styled from 'styled-components';
-import Sidebar from '../sidebar/Sidebar';
 import ChatWindow from '../chat/ChatWindow';
 import { useChatStore } from '../../store/chatStore';
+
+// Ленивая загрузка Sidebar
+const Sidebar = lazy(() => import('../sidebar/Sidebar'));
 
 interface AppLayoutProps {
   onOpenSettings?: () => void;
@@ -72,6 +74,15 @@ const Overlay = styled.div<{ isOpen: boolean }>`
   }
 `;
 
+const FallbackLoader = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+`;
+
 const AppLayout: React.FC<AppLayoutProps> = ({ onOpenSettings }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { activeChatId } = useChatStore();
@@ -93,7 +104,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ onOpenSettings }) => {
       <Overlay isOpen={isSidebarOpen} onClick={closeSidebar} />
       
       <SidebarWrapper isOpen={isSidebarOpen}>
-        <Sidebar activeChatId={activeChatId || undefined} />
+        <Suspense fallback={<FallbackLoader>Загрузка чатов...</FallbackLoader>}>
+          <Sidebar activeChatId={activeChatId || undefined} />
+        </Suspense>
       </SidebarWrapper>
       
       <MainContent>

@@ -114,7 +114,9 @@ const ChatItem: React.FC<ChatItemProps> = ({
   const [editValue, setEditValue] = useState(title);
   
   const handleSelect = () => {
+    console.log('ChatItem clicked, id:', id, 'isEditing:', isEditing);
     if (onSelect && !isEditing) {
+      console.log('Calling onSelect with id:', id);
       onSelect(id);
     }
   };
@@ -194,4 +196,4 @@ const ChatItem: React.FC<ChatItemProps> = ({
   );
 };
 
-export default ChatItem;
+export default React.memo(ChatItem);

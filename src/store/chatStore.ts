@@ -110,6 +110,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   
   // Установить активный чат
   setActiveChat: (chatId) => {
+    console.log('Store setActiveChat called with:', chatId);
     set({ activeChatId: chatId });
   },
   

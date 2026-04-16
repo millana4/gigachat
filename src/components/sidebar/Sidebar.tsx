@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import SearchInput from './SearchInput';
 import ChatList from './ChatList';
@@ -116,22 +116,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeChatId }) => {
     });
   }, [chats, searchQuery]);
   
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     const newChatId = createNewChat();
     console.log('New chat created:', newChatId);
-  };
+  }, [createNewChat]);
   
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = useCallback((chatId: string) => {
+    console.log('Sidebar handleSelectChat called with:', chatId);
     setActiveChat(chatId);
-  };
+  }, [setActiveChat]);
   
-  const handleEditChat = (chatId: string, newTitle: string) => {
+  const handleEditChat = useCallback((chatId: string, newTitle: string) => {
     updateChatTitle(chatId, newTitle);
-  };
+  }, [updateChatTitle]);
   
-  const handleDeleteClick = (chatId: string) => {
+  const handleDeleteClick = useCallback((chatId: string) => {
     setChatToDelete(chatId);
-  };
+  }, []);
   
   const handleConfirmDelete = () => {
     if (chatToDelete) {

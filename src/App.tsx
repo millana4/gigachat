@@ -1,19 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import './styles/theme.css';
 import AppLayout from './components/layout/AppLayout';
-import SettingsPanel from './components/settings/SettingsPanel';
 import AuthForm from './components/auth/AuthForm';
 import { useChatStore } from './store/chatStore';
+import styled from 'styled-components';
+
+// Ленивая загрузка SettingsPanel
+const SettingsPanel = lazy(() => import('./components/settings/SettingsPanel'));
+
+const FallbackLoader = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+`;
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { init } = useChatStore();
+  const { init, createNewChat, chats } = useChatStore();
   
-  // Инициализируем store при загрузке приложения
   useEffect(() => {
     init();
   }, [init]);
+  
+  useEffect(() => {
+    if (chats.length === 0) {
+      createNewChat();
+    }
+  }, [chats.length, createNewChat]);
   
   const handleLogin = (credentials: { auth: string; scope: string }) => {
     console.log('Login attempt:', credentials);
@@ -27,10 +44,12 @@ function App() {
   return (
     <>
       <AppLayout onOpenSettings={() => setIsSettingsOpen(true)} />
-      <SettingsPanel 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
+      <Suspense fallback={<FallbackLoader>Загрузка настроек...</FallbackLoader>}>
+        <SettingsPanel 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)} 
+        />
+      </Suspense>
     </>
   );
 }

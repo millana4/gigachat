@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 const InputContainer = styled.div`
@@ -131,18 +131,15 @@ const InputArea: React.FC<InputAreaProps> = ({
   };
   
   // Отправка сообщения по кнопке
-  const handleSend = () => {
-    // Отправка пустого сообщения запрещена (проверка на пробелы)
+  const handleSend = useCallback(() => {
     if (message.trim() && !isLoading) {
       onSendMessage?.(message);
-      setMessage(''); // Очищаем поле после отправки
-      
-      // Сбрасываем высоту textarea
+      setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
     }
-  };
+  }, [message, isLoading, onSendMessage]);
   
   const handleAttach = () => {
     console.log('Attach image - заглушка');

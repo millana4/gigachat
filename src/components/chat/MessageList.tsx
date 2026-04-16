@@ -52,9 +52,9 @@ const MessageList: React.FC<MessageListProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading, streamingMessage]);
   
-  // Собираем все сообщения для отображения (включая streaming)
+  // Собираем все сообщения для отображения 
   const allMessages = [...messages];
-  if (streamingMessage && !isLoading) {
+  if (streamingMessage) { 
     allMessages.push({
       id: 'streaming-temp',
       role: 'assistant',
