@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/gigachat/static/css/main.98c80ad9.css",
+    "main.js": "/gigachat/static/js/main.4fa08af5.js",
+    "static/js/939.e73350cd.chunk.js": "/gigachat/static/js/939.e73350cd.chunk.js",
+    "static/js/698.288fd2ea.chunk.js": "/gigachat/static/js/698.288fd2ea.chunk.js",
+    "index.html": "/gigachat/index.html",
+    "main.98c80ad9.css.map": "/gigachat/static/css/main.98c80ad9.css.map",
+    "main.4fa08af5.js.map": "/gigachat/static/js/main.4fa08af5.js.map",
+    "939.e73350cd.chunk.js.map": "/gigachat/static/js/939.e73350cd.chunk.js.map",
+    "698.288fd2ea.chunk.js.map": "/gigachat/static/js/698.288fd2ea.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.98c80ad9.css",
+    "static/js/main.4fa08af5.js"
+  ]
+}
