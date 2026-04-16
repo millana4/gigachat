@@ -27,4 +27,4 @@ npm start
 
 Анализ размера сборки (bundle analysis):
 
-![Анализ бандла](public/bundle-analysis.png)
+![Анализ бандла](https://github.com/millana4/gigachat/blob/main/public/bundle-analysis.png)
