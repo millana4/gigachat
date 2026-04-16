@@ -27,4 +27,4 @@ npm start
 
 Анализ размера сборки (bundle analysis):
 
-![Анализ бандла](/home/annie/FrontendProjects/gigachat-frontend/build/bundle-analysis.png)
+![Анализ бандла](public/bundle-analysis.png)
