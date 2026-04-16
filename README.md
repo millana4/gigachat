@@ -22,6 +22,7 @@ git clone https://github.com/millana4/gigachat.git
 cd gigachat
 npm install
 npm start
+``` 
 
 ## Оптимизация бандла
 
